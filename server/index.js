@@ -5,8 +5,10 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 const mysql = require("mysql2");
 const { execSync } = require("child_process");
+//const { readFile } = require("fs")
 
 const defgate = execSync("/srv/server/ip.sh").toString().slice(0,-1);
+//const staticdir = "/srv/server/static/"
 
 const con = mysql.createPool({
   host: defgate,
@@ -19,6 +21,8 @@ const con = mysql.createPool({
 app.use((req,res,next) =>
 {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+//  res.setHeader("Content-Type", "text/plain");
+//  res.setHeader("X-Content-Type-Options", "nosniff");
   next();
 });
 
@@ -27,7 +31,19 @@ function sanitize(q) {
 };
 
 app.get("/", (req, res) => {
-  res.send(execSync("cat /srv/client/index.html").toString());
+  res.send(execSync("cat index.html").toString());
+});
+
+/*app.get("/favicon.ico", (req,res) => {
+  res.setHeader("Content-Type", "image/vnd.microsoft.icon");
+  res.send(execSync("cat favicon.ico"));
+});*/
+
+app.get("/static/:mime/:file", (req,res) => {
+  const catline = "cat static/"+`${req.params.mime}`+"/mimefile";
+  const mimetype = execSync(`${catline}`).toString().slice(0,-1);
+  res.setHeader("Content-Type", mimetype);
+  res.send(execSync(`cat static/${req.params.mime}/${req.params.file}`));
 });
 
 app.get("/api/:param1.:param2", (req, res) => {
@@ -37,7 +53,7 @@ app.get("/api/:param1.:param2", (req, res) => {
 app.get("/create/:fname.:lname", (req, res) => {
   let sql = `INSERT INTO test (firstname, lastname) VALUES ('${sanitize(req.params.fname)}', '${sanitize(req.params.lname)}');`;
   con.query(sql, function (err, result) {
-    if (err) {res.json({ message: "Failed"}); throw err;}
+    if (err) {res.json({ message: "Failed"}); console.log(err);}
     else {res.json({ message: "Created", sqlret: JSON.stringify(result) });}
   });
 });
@@ -45,7 +61,7 @@ app.get("/create/:fname.:lname", (req, res) => {
 app.get("/read/:id", (req, res) => {
   let sql = `SELECT * FROM test WHERE id = '${sanitize(req.params.id)}';`;
   con.query(sql, function (err, result) {
-    if (err) {res.json({ message: "Failed" }); throw err;}
+    if (err) {res.json({ message: "Failed" }); console.log(err);}
     else {res.json({ message: JSON.stringify(result), sqlret: JSON.stringify(result) });}
   });
 });
@@ -53,7 +69,7 @@ app.get("/read/:id", (req, res) => {
 app.get("/update/:id.:fname.:lname", (req, res) => {
   let sql = `UPDATE test SET firstname = '${sanitize(req.params.fname)}', lastname = '${sanitize(req.params.lname)}' WHERE id = '${sanitize(req.params.id)}';`;
   con.query(sql, function (err, result) {
-    if (err) {res.json({ message: "Failed"}); throw err;}
+    if (err) {res.json({ message: "Failed"}); console.log(err);}
     else {res.json({ message: "Updated", sqlret: JSON.stringify(result), q: sql });}
   });
 });
@@ -61,7 +77,7 @@ app.get("/update/:id.:fname.:lname", (req, res) => {
 app.get("/delete/:id", (req, res) => {
   let sql = `DELETE FROM test WHERE id = '${sanitize(req.params.id)}';`;
   con.query(sql, function (err, result) {
-    if (err) {res.json({ message: "Failed"}); throw err;}
+    if (err) {res.json({ message: "Failed"}); console.log(err);}
     else {res.json({ message: "Deleted", sqlret: JSON.stringify(result) });}
   });
 });
