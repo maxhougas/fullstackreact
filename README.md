@@ -1,5 +1,6 @@
 # Fullstackreact
 - A fullstack react application
+- Works with https://hub.docker.com/repository/docker/maxhougas/fullstack/general
 
 ## Mariadb
 - Install via apk add mysql-client mysql; works as expected.
