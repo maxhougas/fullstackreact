@@ -45,6 +45,18 @@ function App() {
       .then((data) => settextout(data.message));
   };
 
+  function reset() {
+    fetch('http://localhost:5000/reset')
+      .then((res) => res.json())
+      .then((data) => settextout(data.message));
+  };
+
+  function dump() {
+    fetch('http://localhost:5000/dump')
+      .then((res) => res.json())
+      .then((data) => settextout(data.message));
+  };
+
   const [textout, settextout] = React.useState("Non-kitty");
   const [ap1text, setap1text] = React.useState("Echo 1");
   const [ap2text, setap2text] = React.useState("Echo 2");
@@ -68,6 +80,10 @@ function App() {
           <button onClick={read}>Read</button>
           <button onClick={update}>Update</button>
           <button onClick={del}>Delete</button>
+        </div>
+        <div>
+          <button onClick={reset}>Reset</button>
+          <button onClick={dump}>Full Dump</button>
         </div>
       </header>
     </div>

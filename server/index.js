@@ -31,19 +31,19 @@ function sanitize(q) {
 };
 
 app.get("/", (req, res) => {
-  res.send(execSync("cat index.html").toString());
+  res.send(execSync("cat build/index.html"));
 });
 
 /*app.get("/favicon.ico", (req,res) => {
   res.setHeader("Content-Type", "image/vnd.microsoft.icon");
-  res.send(execSync("cat favicon.ico"));
+  res.send(execSync("cat build/favicon.ico"));
 });*/
 
 app.get("/static/:mime/:file", (req,res) => {
-  const catline = "cat static/"+`${req.params.mime}`+"/mimefile";
+  const catline = "cat build/static/"+`${req.params.mime}`+"/mimefile";
   const mimetype = execSync(`${catline}`).toString().slice(0,-1);
   res.setHeader("Content-Type", mimetype);
-  res.send(execSync(`cat static/${req.params.mime}/${req.params.file}`));
+  res.send(execSync(`cat build/static/${req.params.mime}/${req.params.file}`));
 });
 
 app.get("/api/:param1.:param2", (req, res) => {
@@ -79,6 +79,26 @@ app.get("/delete/:id", (req, res) => {
   con.query(sql, function (err, result) {
     if (err) {res.json({ message: "Failed"}); console.log(err);}
     else {res.json({ message: "Deleted", sqlret: JSON.stringify(result) });}
+  });
+});
+
+app.get("/reset", (req, res) => {
+  let sqldrop = 'DROP TABLE test;'
+  let sqlrm = 'CREATE TABLE test.test(id INT AUTO_INCREMENT, firstname VARCHAR(255) NOT NULL DEFAULT "Mr.", lastname VARCHAR(255) NOT NULL DEFAULT "Kitty", PRIMARY KEY(id));'
+  con.query(sqldrop, function (err, result) {
+    if (err) {console.log(err);}
+  });
+  con.query(sqlrm, function (err, result) {
+    if (err) {console.log(err); res.json({ message: "Failed" });}
+    else {res.json({ message: "Reset", sqlret: JSON.stringify(result) });}
+  });
+});
+
+app.get("/dump", (req, res) => {
+  let sql = 'SELECT * FROM test';
+  con.query(sql, function(err, result) {
+    if (err) {console.log(err); res.json({ message: "Failed" });}
+    else {res.json({ message: JSON.stringify(result), sqlret: JSON.stringify(result) });}
   });
 });
 
