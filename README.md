@@ -9,4 +9,3 @@
 - Must create /run/mysql. This is where the socet file lives.
 - Networking is disabled by default. add "[mysqld]\nskip-networking=0\nskip-bind-address" to /etc/my.cnf
 - By default root is denied access from the network. Best to add a new user.
-### You must execute /srv/dbinit.sh
